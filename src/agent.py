@@ -20,9 +20,10 @@ MAX_STEPS = 6
 
 client = genai.Client(http_options=types.HttpOptions(timeout=60000))  # 60s per call
 
-# Deliberately minimal v1 prompt. We improve it later based on eval failures,
-# so you'll have real before/after numbers.
-SYSTEM_PROMPT = """You are a data analyst agent. You answer questions about a SQLite database of e-commerce orders.
+# ---------------------------------------------------------------------------
+# Prompt v1: the original minimal baseline. Kept unchanged so it can be rerun.
+# ---------------------------------------------------------------------------
+SYSTEM_PROMPT_V1 = """You are a data analyst agent. You answer questions about a SQLite database of e-commerce orders.
 
 Rules:
 1. Call get_schema first to see the tables and columns. Never guess column names.
@@ -31,6 +32,25 @@ Rules:
 4. If the database cannot answer the question, say so clearly instead of guessing.
 5. Give exact numbers (no abbreviations like "1.2M"). Write percentages with a % sign.
 6. When you are ready, call final_answer with a short, direct answer. Set can_answer to false if the database cannot answer the question, otherwise true."""
+
+# ---------------------------------------------------------------------------
+# Prompt v2: written after reading the v1 failure traces.
+# ---------------------------------------------------------------------------
+SYSTEM_PROMPT_V2 = f"""You are a data analyst agent. You answer questions about a SQLite database of e-commerce orders. You have read-only access and at most {MAX_STEPS} steps, so work efficiently.
+
+Rules:
+1. Call get_schema exactly once, first. It lists every table and column that exists. Never guess column names, and do not look for tables or columns that get_schema did not list.
+2. Use run_sql to run SELECT queries. If a query returns an error, read it and fix the query.
+3. As soon as a query result answers the question, call final_answer immediately. Do not re-verify a result unless it is an error, empty, or implausible.
+4. Base your answer only on query results. Never invent numbers.
+5. If the question needs data that is not in the schema (for example a table or column that does not exist), do not keep searching. Call final_answer with can_answer=false and say what is missing.
+6. You cannot modify data. If asked to delete, update, insert, create or drop anything, do not try. Call final_answer with can_answer=false and explain that you have read-only access.
+7. Give exact numbers (no abbreviations like "1.2M"). Write percentages with a % sign.
+8. Set can_answer=true only when you answered from query results."""
+
+# Choose with the PROMPT_VERSION environment variable (default: v2)
+PROMPT_VERSION = os.getenv("PROMPT_VERSION", "v2")
+SYSTEM_PROMPT = SYSTEM_PROMPT_V1 if PROMPT_VERSION == "v1" else SYSTEM_PROMPT_V2
 
 TOOLS = types.Tool(
     function_declarations=[
@@ -109,6 +129,7 @@ def run_agent(question, max_steps=MAX_STEPS, verbose=True):
     trace = {
         "question": question,
         "model": MODEL,
+        "prompt_version": PROMPT_VERSION,
         "started": datetime.now().isoformat(timespec="seconds"),
         "steps": [],
     }

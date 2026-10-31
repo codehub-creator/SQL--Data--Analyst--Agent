@@ -40,7 +40,7 @@ def values_match(gold_rows, answer):
             if isinstance(cell, (int, float)):
                 if not number_matches(float(cell), answer):
                     return False
-            elif norm(cell) not in norm(answer):
+            elif not re.search(r"(?<![a-z0-9])" + re.escape(norm(cell)) + r"(?![a-z0-9])", norm(answer)):
                 return False
     return True
 
