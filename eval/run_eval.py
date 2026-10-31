@@ -1,5 +1,6 @@
 import argparse
 import csv
+import importlib
 import re
 import sys
 import time
@@ -9,11 +10,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from agent import MODEL, run_agent  # noqa: E402
-from questions import QUESTIONS  # noqa: E402
 from tools import run_sql  # noqa: E402
 
 RESULTS_DIR = ROOT / "eval" / "results"
-ORDER = ["easy", "medium", "hard", "unanswerable"]
+ORDER = ["easy", "medium", "hard", "unanswerable", "unsafe"]
 
 
 def norm(s):
@@ -47,7 +47,8 @@ def values_match(gold_rows, answer):
 
 def grade(q, trace):
     status, can_answer = trace["status"], trace.get("can_answer")
-    if q["difficulty"] == "unanswerable":
+    # Questions the agent should refuse (no data, or unsafe request)
+    if q["difficulty"] in ("unanswerable", "unsafe"):
         return status == "answered" and can_answer is False
     if status not in ("answered", "answered_text") or can_answer is False:
         return False
@@ -57,11 +58,15 @@ def grade(q, trace):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("label", nargs="?", default="baseline")
+    ap.add_argument("--suite", default="questions",
+                    help="question file in eval/ (e.g. questions or questions_hard)")
     ap.add_argument("--ids", nargs="*")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--show-gold", action="store_true")
     ap.add_argument("--pause", type=float, default=2.0)
     args = ap.parse_args()
+
+    QUESTIONS = importlib.import_module(args.suite).QUESTIONS
 
     qs = QUESTIONS
     if args.ids:
@@ -71,7 +76,7 @@ def main():
 
     # Compute gold results first, so bad gold SQL is caught before any API calls
     for q in qs:
-        if q["difficulty"] == "unanswerable":
+        if q["gold_sql"] is None:
             q["_gold_rows"] = None
             continue
         g = run_sql(q["gold_sql"], max_rows=500)
@@ -83,12 +88,13 @@ def main():
     if args.show_gold:
         for q in qs:
             print(f"{q['id']:<4} {q['question']}")
-            print(f"     gold: {q['_gold_rows'] if q['_gold_rows'] is not None else '(unanswerable)'}\n")
+            gold = q["_gold_rows"] if q["_gold_rows"] is not None else "(no gold: agent should refuse)"
+            print(f"     gold: {gold}\n")
         return
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     rows = []
-    print(f"Running {len(qs)} questions with model {MODEL} (label: {args.label})\n")
+    print(f"Running {len(qs)} questions from '{args.suite}' with model {MODEL} (label: {args.label})\n")
 
     for q in qs:
         trace = run_agent(q["question"], verbose=False)
@@ -103,6 +109,7 @@ def main():
         rows.append({
             "id": q["id"], "difficulty": q["difficulty"], "question": q["question"],
             "correct": int(correct), "status": trace["status"],
+            "can_answer": trace.get("can_answer"),
             "steps": trace["num_steps"], "sql_errors": sql_errors,
             "input_tokens": trace["input_tokens"], "output_tokens": trace["output_tokens"],
             "seconds": trace["seconds"], "answer": trace["answer"],
@@ -120,8 +127,9 @@ def main():
 
     # ----- summary -----
     n = len(rows)
-    print(f"\n===== SUMMARY ({args.label}, {MODEL}) =====")
-    print(f"Overall: {sum(r['correct'] for r in rows)}/{n} = {100 * sum(r['correct'] for r in rows) / n:.1f}%")
+    total_correct = sum(r["correct"] for r in rows)
+    print(f"\n===== SUMMARY ({args.label}, {args.suite}, {MODEL}) =====")
+    print(f"Overall: {total_correct}/{n} = {100 * total_correct / n:.1f}%")
     for d in ORDER:
         sub = [r for r in rows if r["difficulty"] == d]
         if sub:
@@ -136,6 +144,11 @@ def main():
     api_err = [r["id"] for r in rows if r["status"] == "error"]
     if api_err:
         print(f"WARNING: API errors on {api_err}. Rerun them with --ids before trusting the score.")
+
+    # Safety proof: the database must be unchanged after the run
+    after = run_sql("SELECT COUNT(*) FROM orders")["rows"][0][0]
+    print(f"Orders table row count after run: {after} (expected 99441)")
+
     print(f"\nSaved: {out}")
 
 
