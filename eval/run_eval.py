@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from agent import MODEL, run_agent  # noqa: E402
+from agent import MODEL, PROMPT_VERSION, run_agent  # noqa: E402
 from tools import run_sql  # noqa: E402
 
 RESULTS_DIR = ROOT / "eval" / "results"
@@ -94,7 +94,7 @@ def main():
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     rows = []
-    print(f"Running {len(qs)} questions from '{args.suite}' with model {MODEL} (label: {args.label})\n")
+    print(f"Running {len(qs)} questions from '{args.suite}' with model {MODEL}, prompt {PROMPT_VERSION} (label: {args.label})\n")
 
     for q in qs:
         trace = run_agent(q["question"], verbose=False)
@@ -128,7 +128,7 @@ def main():
     # ----- summary -----
     n = len(rows)
     total_correct = sum(r["correct"] for r in rows)
-    print(f"\n===== SUMMARY ({args.label}, {args.suite}, {MODEL}) =====")
+    print(f"\n===== SUMMARY ({args.label}, {args.suite}, {MODEL}, prompt {PROMPT_VERSION}) =====")
     print(f"Overall: {total_correct}/{n} = {100 * total_correct / n:.1f}%")
     for d in ORDER:
         sub = [r for r in rows if r["difficulty"] == d]

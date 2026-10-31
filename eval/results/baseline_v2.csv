@@ -1,0 +1,39 @@
+id,difficulty,question,correct,status,can_answer,steps,sql_errors,input_tokens,output_tokens,seconds,answer,gold
+E1,easy,How many orders are in the database?,1,answered,True,3,0,5263,65,2.4,"There are 99,441 orders in the database.",[[99441]]
+E2,easy,How many orders were canceled?,1,answered,True,3,0,5331,69,2.4,There were 625 canceled orders.,[[625]]
+E3,easy,"What is the most common payment type, and how many payments used it?",1,answered,True,3,0,5315,93,2.2,"The most common payment type is credit_card, and 76,795 payments used it.","[['credit_card', 76795]]"
+E4,easy,"What is the average price of an order item, rounded to 2 decimals?",1,answered,True,3,0,5303,81,2.1,The average price of an order item is 120.65.,[[120.65]]
+E5,easy,What is the highest price of any single order item?,1,answered,True,3,0,5277,72,2.3,The highest price of any single order item is 6735.0.,[[6735.0]]
+E6,easy,How many distinct customer states appear in the customers table?,1,answered,True,3,0,5281,72,64.6,There are 27 distinct customer states that appear in the customers table.,[[27]]
+E7,easy,How many orders have the status 'shipped'?,1,answered,True,3,0,5277,76,2.3,"There are 1,107 orders with the status 'shipped'.",[[1107]]
+E8,easy,What is the highest number of payment installments used in any single payment?,1,answered,True,3,0,5290,74,2.1,The highest number of payment installments used in any single payment is 24.,[[24]]
+E9,easy,How many products are in the products table?,1,answered,True,3,0,5266,66,2.3,"There are 32,951 products in the products table.",[[32951]]
+E10,easy,"What is the total freight_value across all order items, rounded to 2 decimals?",1,answered,True,3,0,5318,91,2.4,The total freight_value across all order items is 2251909.54.,[[2251909.54]]
+M1,medium,"Which 3 customer states have the most orders, and how many orders does each have?",1,answered,True,3,0,5378,166,34.1,"The 3 customer states with the most orders are:
+1. SP (São Paulo): 41,746 orders
+2. RJ (Rio de Janeiro): 12,852 orders
+3. MG (Minas Gerais): 11,635 orders","[['SP', 41746], ['RJ', 12852], ['MG', 11635]]"
+M2,medium,What are the top 5 product categories by number of items sold? Use the English category names and include the counts.,1,answered,True,3,0,5470,239,3.3,"The top 5 product categories by number of items sold are:
+1. bed_bath_table: 11,115 items
+2. health_beauty: 9,670 items
+3. sports_leisure: 8,641 items
+4. furniture_decor: 8,334 items
+5. computers_accessories: 7,827 items","[['bed_bath_table', 11115], ['health_beauty', 9670], ['sports_leisure', 8641], ['furniture_decor', 8334], ['computers_accessories', 7827]]"
+M3,medium,"What is the total payment value of all credit card payments, rounded to 2 decimals?",1,answered,True,3,0,5333,105,2.5,"The total payment value of all credit card payments is 12,542,084.19.",[[12542084.19]]
+M4,medium,"What is the average freight_value per order item for customers located in the state SP, rounded to 2 decimals?",1,answered,True,3,0,5377,138,3.1,The average freight_value per order item for customers located in the state SP is 15.15.,[[15.15]]
+M5,medium,How many orders were placed in 2017?,1,answered,True,3,0,5294,86,2.3,"45,101 orders were placed in 2017.",[[45101]]
+M6,medium,"Which payment type has the highest average payment_value, and what is that average, rounded to 2 decimals?",1,answered,True,3,0,5401,112,2.6,"The payment type with the highest average payment_value is credit_card, with an average of 163.32.","[['credit_card', 163.32]]"
+M7,medium,How many order items were sold in the product category whose English name is 'health_beauty'?,1,answered,True,3,0,5362,136,33.2,"There were 9,670 order items sold in the product category whose English name is 'health_beauty'.",[[9670]]
+M8,medium,How many orders contain more than one item?,1,answered,True,3,0,5295,93,2.2,"9,803 orders contain more than one item.",[[9803]]
+M9,medium,"What is the total revenue from item prices (excluding freight) for orders with status 'delivered', rounded to 2 decimals?",1,answered,True,3,0,5365,126,3.4,The total revenue from item prices (excluding freight) for orders with status 'delivered' is 13221498.11.,[[13221498.11]]
+M10,medium,"Which customer state has the highest average payment_value per payment record, and what is that average, rounded to 2 decimals?",1,answered,True,3,0,5485,174,4.4,"The customer state with the highest average payment_value per payment record is PB (Paraíba), with an average payment value of 248.33.","[['PB', 248.33]]"
+H1,hard,What percentage of all orders have the status 'delivered'? Round to 2 decimals.,1,answered,True,3,0,5331,106,2.3,97.02% of all orders have the status 'delivered'.,[[97.02]]
+H2,hard,How many delivered orders arrived after their estimated delivery date?,1,answered,True,3,0,5295,93,33.3,"There are 7,826 delivered orders that arrived after their estimated delivery date.",[[7826]]
+H3,hard,"For delivered orders, what is the average number of days from purchase to delivery to the customer? Round to 1 decimal.",1,answered,True,3,0,5382,139,2.5,The average number of days from purchase to delivery for delivered orders is 12.6 days.,[[12.6]]
+H4,hard,"Which month (format YYYY-MM, based on the order purchase date) had the highest total payment value, and what was that total, rounded to 2 decimals?",1,answered,True,3,0,5429,151,3.5,"The month with the highest total payment value was 2017-11 with a total payment value of 1,194,882.80.","[['2017-11', 1194882.8]]"
+H5,hard,"How many unique customers (real people, identified by customer_unique_id) placed more than one order?",1,answered,True,3,0,5364,137,3.2,"There are 2,997 unique customers (identified by customer_unique_id) who placed more than one order.",[[2997]]
+H6,hard,"Among product categories with at least 100 items sold, which has the highest average item price? Give the English name and the average, rounded to 2 decimals.",1,answered,True,3,0,5504,240,3.4,"The product category with at least 100 items sold that has the highest average item price is ""computers"" (English name), with an average item price of 1098.34 (and 203 items sold).","[['computers', 1098.34]]"
+H7,hard,"How many orders were paid using more than one distinct payment type (for example, credit card plus voucher)?",1,answered,True,3,0,5337,107,34.1,"There are 2,246 orders that were paid using more than one distinct payment type.",[[2246]]
+U1,unanswerable,What is the average age of our customers?,1,answered,False,2,0,2853,72,2.6,"The database does not contain customer age information. The customers table only contains customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, and customer_state.",None
+U2,unanswerable,What was the profit margin on orders placed in 2017?,0,max_steps,,6,1,13955,133,5.2,,None
+U3,unanswerable,Which marketing channel brought in the most customers?,1,answered,False,2,0,2853,45,1.5,The database does not contain information about marketing channels or customer acquisition channels.,None
