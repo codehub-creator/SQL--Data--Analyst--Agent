@@ -29,7 +29,8 @@ Rules:
 2. Use run_sql to run SELECT queries. If a query returns an error, read it and fix the query.
 3. Base your answer only on query results. Never invent numbers.
 4. If the database cannot answer the question, say so clearly instead of guessing.
-5. When you are ready, call final_answer with a short, direct answer that includes the key numbers."""
+5. Give exact numbers (no abbreviations like "1.2M"). Write percentages with a % sign.
+6. When you are ready, call final_answer with a short, direct answer. Set can_answer to false if the database cannot answer the question, otherwise true."""
 
 TOOLS = types.Tool(
     function_declarations=[
@@ -58,9 +59,13 @@ TOOLS = types.Tool(
                 properties={
                     "answer": types.Schema(
                         type=types.Type.STRING, description="The final answer with key numbers."
-                    )
+                    ),
+                    "can_answer": types.Schema(
+                        type=types.Type.BOOLEAN,
+                        description="False if the database cannot answer the question, otherwise True.",
+                    ),
                 },
-                required=["answer"],
+                required=["answer", "can_answer"],
             ),
         ),
     ]
@@ -108,6 +113,7 @@ def run_agent(question, max_steps=MAX_STEPS, verbose=True):
         "steps": [],
     }
     answer, status = None, "max_steps"
+    can_answer = None
     in_tokens = out_tokens = 0
     t0 = time.time()
 
@@ -146,6 +152,7 @@ def run_agent(question, max_steps=MAX_STEPS, verbose=True):
 
                 if call.name == "final_answer":
                     answer, finished = args.get("answer", ""), True
+                    can_answer = args.get("can_answer")
                     trace["steps"].append({"step": step, "tool": "final_answer", "input": args})
                     if verbose:
                         print(f"[step {step}] final_answer")
@@ -189,6 +196,7 @@ def run_agent(question, max_steps=MAX_STEPS, verbose=True):
         {
             "status": status,
             "answer": answer,
+            "can_answer": can_answer,
             "num_steps": len(trace["steps"]),
             "input_tokens": in_tokens,
             "output_tokens": out_tokens,
