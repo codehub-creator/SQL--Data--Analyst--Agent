@@ -118,6 +118,20 @@ def summarize(result):
     return f"ERROR: {result.get('error')}"
 
 
+def save_trace(trace):
+    """Save a trace file locally. The public demo turns this off with SAVE_TRACES=0."""
+    if os.getenv("SAVE_TRACES", "1") != "1":
+        return
+    try:
+        TRACE_DIR.mkdir(exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        (TRACE_DIR / f"trace_{stamp}.json").write_text(
+            json.dumps(trace, indent=2, default=str), encoding="utf-8"
+        )
+    except OSError:
+        pass  # never let logging break an answer
+
+
 def run_agent(question, max_steps=MAX_STEPS, verbose=True):
     contents = [types.Content(role="user", parts=[types.Part(text=question)])]
     config = types.GenerateContentConfig(
@@ -225,11 +239,7 @@ def run_agent(question, max_steps=MAX_STEPS, verbose=True):
         }
     )
 
-    TRACE_DIR.mkdir(exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    (TRACE_DIR / f"trace_{stamp}.json").write_text(
-        json.dumps(trace, indent=2, default=str), encoding="utf-8"
-    )
+    save_trace(trace)
 
     if verbose:
         print(f"ANSWER: {answer}")

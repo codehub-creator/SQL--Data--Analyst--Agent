@@ -1,3 +1,5 @@
+import gzip
+import shutil
 import os
 import sys
 from datetime import date
@@ -13,15 +15,36 @@ load_dotenv()
 
 st.set_page_config(page_title="SQL Analyst Agent", page_icon="📊", layout="wide")
 
+# On Streamlit Community Cloud, settings live in st.secrets. Copy them into the
+# environment so the rest of the code can keep using os.getenv.
+try:
+    for _k in ("GEMINI_API_KEY", "GEMINI_MODEL", "SESSION_LIMIT", "DAILY_LIMIT",
+               "SAVE_TRACES", "PROMPT_VERSION"):
+        if _k in st.secrets and _k not in os.environ:
+            os.environ[_k] = str(st.secrets[_k])
+except Exception:
+    pass  # no secrets file locally; .env is used instead
+
 SESSION_LIMIT = int(os.getenv("SESSION_LIMIT", "10"))  # questions per visitor session
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "150"))     # questions per day, all visitors
 DB_PATH = ROOT / "data" / "olist.db"
+DB_GZ_PATH = DB_PATH.with_name("olist.db.gz")
+
+
+@st.cache_resource
+def ensure_database():
+    """Unpack the compressed database on first start (the repo stores olist.db.gz)."""
+    if not DB_PATH.exists() and DB_GZ_PATH.exists():
+        with gzip.open(DB_GZ_PATH, "rb") as src, open(DB_PATH, "wb") as dst:
+            shutil.copyfileobj(src, dst)
+    return DB_PATH.exists()
+
 
 if not (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")):
-    st.error("No API key found. Set GEMINI_API_KEY in .env (local) or in the Space secrets.")
+    st.error("No API key found. Set GEMINI_API_KEY in .env (locally) or in the app's Secrets.")
     st.stop()
-if not DB_PATH.exists():
-    st.error("Database not found at data/olist.db. Run `python src/load_data.py` first.")
+if not ensure_database():
+    st.error("Database not found. Run `python src/load_data.py` locally, or add data/olist.db.gz.")
     st.stop()
 
 from agent import MODEL, MAX_STEPS, run_agent  # noqa: E402
@@ -90,6 +113,7 @@ with st.sidebar:
         "Data: Olist Brazilian E-Commerce Public Dataset (Kaggle, CC BY-NC-SA 4.0). "
         "Answers come from an LLM and can be wrong, so check the SQL."
     )
+    st.caption("Questions are sent to Google's Gemini API (free tier). Please don't enter personal information.")
 
 st.session_state.setdefault("used", 0)
 question = st.text_input("Your question", key="question", placeholder="e.g. Which state has the most customers?")

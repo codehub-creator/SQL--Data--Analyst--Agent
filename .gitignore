@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data (only the compressed database is tracked)
+data/*
+!data/olist.db.gz
+
+# Local agent traces
+traces/
