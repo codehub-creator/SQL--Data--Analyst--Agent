@@ -5,7 +5,7 @@ An LLM agent that answers plain-English questions about an e-commerce database. 
 **[Live demo](https://sql--data--analyst--agent-dwuibjakopvrcmuxbi4c6r.streamlit.app)** · Gemini function calling · SQLite · Streamlit · [Results](#results) · [Failure analysis](#failure-analysis)
 
 
-> The demo sleeps when idle (give it a minute to wake up) and runs on a free API tier, so it can be rate-limited. The GIF above shows it working.
+> The demo sleeps when idle (give it a minute to wake up) and runs on a free API tier, so it can be rate-limited.
 
 ## Highlights
 
