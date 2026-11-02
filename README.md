@@ -9,7 +9,7 @@ An LLM agent that answers plain-English questions about an e-commerce database. 
 
 ## Highlights
 
-- **Hand-written agent loop** on the Gemini function-calling API, with no agent framework. Every step is logged, and tool errors go back to the model so it can fix its own SQL.
+- **Agent loop** on the Gemini function-calling API, with no agent framework. Every step is logged, and tool errors go back to the model so it can fix its own SQL.
 - **Four independent safety layers** (read-only connection, statement checks, a SQLite authorizer, timeout and row limits), tested with 14 attack queries. The orders table kept all 99,441 rows across every benchmark run.
 - **51-question benchmark** with gold SQL, graded automatically. My first 30 questions scored 100%, which showed they were too easy, so I added a harder suite and a held-out set.
 - **Failure analysis from real traces**, including two failures I documented and deliberately left unfixed.
