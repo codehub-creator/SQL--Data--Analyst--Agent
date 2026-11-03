@@ -525,4 +525,4 @@ with tab_how:
         st.code(SYSTEM_PROMPT_V2, language="text")
 
 st.divider()
-st.caption(f"Built by Codeeehubb · [Source and write-up]({GITHUB_URL})")
+st.caption(f"Built by Pooja Choudhary · [Source and write-up]({GITHUB_URL})")
